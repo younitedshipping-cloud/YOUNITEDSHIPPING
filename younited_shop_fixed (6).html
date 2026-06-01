@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Younited Shipping - Shop</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal:#1a5f5e;
+  --teal-dark:#0d3d3c;
+  --teal-light:#2a8a88;
+  --teal-pale:#e8f4f3;
+  --teal-mid:#c5e8e7;
+  --cream:#f7f3eb;
+  --cream-dark:#ede8dc;
+  --text:#1a1a1a;
+  --muted:#6b7280;
+  --border:#dde8e7;
+  --white:#ffffff;
+  --accent:#e8521a;
+  --gold:#c9941a;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+
+/* OVERLAY / MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center}
+.overlay.active{display:flex}
+.modal{background:var(--white);border-radius:20px;width:100%;max-width:460px;padding:2.5rem;position:relative;box-shadow:0 25px 60px rgba(0,0,0,0.2)}
+.modal-close{position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.6rem;cursor:pointer;color:var(--muted)}
+.modal h2{font-family:'Playfair Display',serif;color:var(--teal-dark);margin-bottom:0.3rem;font-size:1.6rem}
+.modal .subtitle{color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem}
+.modal-logo{width:60px;margin-bottom:1rem}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:0.85rem;font-weight:500;color:var(--teal-dark);margin-bottom:0.4rem}
+.form-group input,.form-group select{width:100%;padding:0.75rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.95rem;background:var(--cream);transition:border 0.2s}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:var(--teal-light);background:var(--white)}
+.btn-primary{width:100%;padding:0.85rem;background:var(--teal);color:var(--white);border:none;border-radius:12px;font-family:inherit;font-size:1rem;font-weight:600;cursor:pointer;transition:background 0.2s;margin-top:0.5rem}
+.btn-primary:hover{background:var(--teal-dark)}
+.btn-outline{width:100%;padding:0.75rem;background:var(--white);color:var(--teal);border:1.5px solid var(--teal);border-radius:12px;font-family:inherit;font-size:0.95rem;font-weight:500;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-top:0.5rem}
+.btn-outline:hover{background:var(--teal-pale)}
+.divider{display:flex;align-items:center;gap:0.8rem;margin:1rem 0;color:var(--muted);font-size:0.85rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.link-btn{background:none;border:none;color:var(--teal);cursor:pointer;font-family:inherit;font-size:0.9rem;text-decoration:underline}
+.tab-group{display:flex;gap:0;background:var(--cream);border-radius:10px;padding:4px;margin-bottom:1.2rem}
+.tab-btn{flex:1;padding:0.55rem;border:none;background:none;border-radius:8px;font-family:inherit;font-size:0.9rem;cursor:pointer;color:var(--muted);transition:all 0.2s}
+.tab-btn.active{background:var(--white);color:var(--teal);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+.otp-inputs{display:flex;gap:0.5rem;margin-top:0.5rem}
+.otp-inputs input{width:48px;height:52px;text-align:center;font-size:1.4rem;font-weight:600;border:1.5px solid var(--border);border-radius:10px;background:var(--cream)}
+
+/* HEADER */
+header{background:var(--teal-dark);position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+.header-main{display:flex;align-items:center;gap:1rem;padding:0.7rem 2rem}
+.logo-wrap{display:flex;align-items:center;gap:0.6rem;text-decoration:none;flex-shrink:0}
+.logo-img{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.3);background:var(--cream)}
+.logo-text{color:var(--white);font-family:'Playfair Display',serif;font-size:1.1rem;line-height:1.1}
+.logo-text span{display:block;font-size:0.65rem;font-weight:400;letter-spacing:2px;color:rgba(255,255,255,0.7);font-family:'DM Sans',sans-serif}
+.search-wrap{flex:1;display:flex;align-items:center;background:var(--white);border-radius:50px;overflow:hidden;border:2px solid transparent;transition:border 0.2s;max-width:600px}
+.search-wrap:focus-within{border-color:var(--gold)}
+.search-wrap select{padding:0.6rem 0.8rem;border:none;border-right:1px solid var(--border);background:var(--cream-dark);font-family:inherit;font-size:0.8rem;color:var(--text);cursor:pointer;border-radius:0}
+.search-wrap input{flex:1;padding:0.6rem 1rem;border:none;font-family:inherit;font-size:0.95rem;background:transparent}
+.search-wrap input:focus{outline:none}
+.search-wrap button{padding:0.6rem 1.2rem;background:var(--gold);border:none;cursor:pointer;color:var(--white);font-size:1.1rem;display:flex;align-items:center;transition:background 0.2s}
+.search-wrap button:hover{background:#a87a12}
+.header-actions{display:flex;align-items:center;gap:0.8rem;flex-shrink:0}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--white);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:0.65rem;padding:0.4rem;border-radius:8px;transition:background 0.2s;position:relative}
+.icon-btn:hover{background:rgba(255,255,255,0.1)}
+.icon-btn svg{width:22px;height:22px}
+.cart-badge{position:absolute;top:0;right:0;background:var(--accent);color:white;border-radius:50%;width:16px;height:16px;font-size:0.6rem;display:flex;align-items:center;justify-content:center;font-weight:700}
+.header-divider{height:1px;background:rgba(255,255,255,0.15)}
+
+/* NAV CATEGORIES */
+.nav-cats{background:var(--teal);padding:0.6rem 2rem;overflow-x:auto;scrollbar-width:none;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,0.1)}
+.nav-cats::-webkit-scrollbar{display:none}
+.cat-pill{display:inline-flex;align-items:center;gap:0.4rem;padding:0.4rem 1rem;border-radius:50px;color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;cursor:pointer;border:1px solid rgba(255,255,255,0.2);margin-right:0.5rem;transition:all 0.2s;background:transparent;white-space:nowrap}
+.cat-pill:hover,.cat-pill.active{background:rgba(255,255,255,0.2);color:var(--white);border-color:rgba(255,255,255,0.5)}
+.cat-pill svg{width:14px;height:14px}
+.section-divider{height:1px;background:var(--border);margin:0}
+
+/* HERO / BANNER */
+.hero-banner{background:linear-gradient(135deg,var(--teal-dark) 0%,var(--teal) 60%,var(--teal-light) 100%);padding:2.5rem 2rem;display:flex;align-items:center;justify-content:space-between;overflow:hidden;position:relative}
+.hero-banner::after{content:'';position:absolute;right:-50px;top:-50px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.05)}
+.hero-content{color:var(--white);max-width:500px;position:relative;z-index:1}
+.hero-content h1{font-family:'Playfair Display',serif;font-size:2.2rem;line-height:1.2;margin-bottom:0.8rem}
+.hero-content p{opacity:0.85;margin-bottom:1.5rem;font-size:1rem}
+.hero-cta{display:inline-flex;align-items:center;gap:0.5rem;background:var(--white);color:var(--teal-dark);padding:0.75rem 1.5rem;border-radius:50px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:0.95rem;transition:transform 0.2s}
+.hero-cta:hover{transform:translateY(-2px)}
+.hero-ship-icon{opacity:0.15;position:absolute;right:1rem;font-size:8rem;color:white}
+
+/* DEALS BAR */
+.deals-bar{background:var(--white);display:flex;gap:0;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border)}
+.deals-bar::-webkit-scrollbar{display:none}
+.deal-item{flex:0 0 auto;padding:0.8rem 1.5rem;text-align:center;cursor:pointer;border-right:1px solid var(--border);transition:background 0.2s;min-width:140px}
+.deal-item:hover{background:var(--cream)}
+.deal-item .deal-label{font-size:0.75rem;color:var(--muted);font-weight:500;letter-spacing:0.5px}
+.deal-item .deal-val{font-size:1.1rem;font-weight:700;color:var(--accent)}
+
+/* SECTIONS */
+.section{padding:1.5rem 2rem}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.section-header h2{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--teal-dark)}
+.see-all{background:none;border:1.5px solid var(--teal);color:var(--teal);padding:0.4rem 1rem;border-radius:50px;cursor:pointer;font-family:inherit;font-size:0.85rem;font-weight:500;transition:all 0.2s}
+.see-all:hover{background:var(--teal);color:white}
+
+/* PRODUCT CARDS */
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
+.product-card{background:var(--white);border-radius:16px;overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:all 0.25s;position:relative}
+.product-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(26,95,94,0.15);border-color:var(--teal-mid)}
+.product-img{width:100%;height:180px;object-fit:contain;background:var(--cream);padding:1rem}
+.product-info{padding:0.9rem}
+.product-badge{position:absolute;top:0.7rem;left:0.7rem;background:var(--accent);color:white;font-size:0.7rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:6px}
+.product-wishlist{position:absolute;top:0.7rem;right:0.7rem;background:white;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);transition:all 0.2s}
+.product-wishlist:hover,.product-wishlist.active{color:var(--accent);border-color:var(--accent)}
+.product-name{font-size:0.9rem;font-weight:500;margin-bottom:0.3rem;line-height:1.4;color:var(--text)}
+.product-meta{font-size:0.78rem;color:var(--muted);margin-bottom:0.5rem}
+.product-price{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap}
+.price-current{font-size:1.1rem;font-weight:700;color:var(--teal-dark)}
+.price-old{font-size:0.82rem;color:var(--muted);text-decoration:line-through}
+.price-off{font-size:0.78rem;color:var(--accent);font-weight:600}
+.stars{display:flex;align-items:center;gap:3px;margin-bottom:0.4rem}
+.star{color:var(--gold);font-size:0.85rem}
+.star-count{font-size:0.75rem;color:var(--muted)}
+.btn-add-cart{width:100%;padding:0.55rem;background:var(--teal);color:white;border:none;border-radius:8px;font-family:inherit;font-size:0.85rem;font-weight:600;cursor:pointer;margin-top:0.7rem;transition:background 0.2s}
+.btn-add-cart:hover{background:var(--teal-dark)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1.5px solid var(--border);display:flex;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.1)}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0.7rem 0.5rem;cursor:pointer;color:var(--muted);font-size:0.7rem;font-weight:500;border:none;background:none;font-family:inherit;transition:all 0.2s;border-top:2px solid transparent}
+.nav-tab.active{color:var(--teal);border-top-color:var(--teal)}
+.nav-tab svg{width:22px;height:22px}
+body{padding-bottom:70px}
+
+/* PRODUCT DETAIL PAGE */
+#product-detail-page{display:none;background:var(--cream);min-height:100vh}
+.product-detail-img-wrap{background:var(--white);padding:1.5rem;text-align:center;border-bottom:1px solid var(--border)}
+.product-detail-img-wrap img{max-height:300px;object-fit:contain;width:100%}
+.thumbnails{display:flex;gap:0.5rem;justify-content:center;margin-top:1rem}
+.thumb{width:56px;height:56px;border-radius:8px;object-fit:contain;border:2px solid var(--border);background:var(--cream);cursor:pointer;padding:4px;transition:border 0.2s}
+.thumb.active{border-color:var(--teal)}
+.product-detail-info{padding:1.2rem 1.5rem;background:var(--white);margin-bottom:0.5rem}
+.product-detail-info h1{font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:0.5rem;color:var(--teal-dark)}
+.variants-section{padding:1.2rem 1.5rem;background:var(--white);margin-bottom:0.5rem}
+.variants-section h3{font-size:1rem;font-weight:600;color:var(--teal-dark);margin-bottom:0.8rem}
+.variant-label{font-size:0.85rem;font-weight:500;color:var(--muted);margin-bottom:0.5rem;display:block}
+.color-options{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.color-opt{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border 0.2s}
+.color-opt.active{border-color:var(--teal-dark);transform:scale(1.15)}
+.size-options{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.size-opt{padding:0.4rem 0.9rem;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:500;transition:all 0.2s;background:var(--white)}
+.size-opt.active{border-color:var(--teal);background:var(--teal-pale);color:var(--teal-dark)}
+.order-section{padding:1.2rem 1.5rem;background:var(--white);margin-bottom:0.5rem}
+.delivery-info{background:var(--teal-pale);border-radius:10px;padding:0.8rem 1rem;margin-bottom:1rem;font-size:0.88rem}
+.delivery-info strong{color:var(--teal-dark)}
+.action-buttons{display:flex;gap:0.8rem}
+.btn-cart{flex:1;padding:0.8rem;background:var(--gold);color:white;border:none;border-radius:12px;font-family:inherit;font-weight:600;cursor:pointer;font-size:0.95rem;transition:background 0.2s}
+.btn-cart:hover{background:#a87a12}
+.btn-buy{flex:1;padding:0.8rem;background:var(--teal);color:white;border:none;border-radius:12px;font-family:inherit;font-weight:600;cursor:pointer;font-size:0.95rem;transition:background 0.2s}
+.btn-buy:hover{background:var(--teal-dark)}
+.share-btn{padding:0.8rem 1rem;background:var(--white);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;font-size:1.1rem;transition:border 0.2s}
+.share-btn:hover{border-color:var(--teal)}
+.reviews-section{padding:1.2rem 1.5rem;background:var(--white);margin-bottom:0.5rem}
+.reviews-section h3{font-size:1rem;font-weight:600;color:var(--teal-dark);margin-bottom:0.8rem}
+.review-form textarea{width:100%;padding:0.75rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.9rem;resize:none;background:var(--cream)}
+.review-item{padding:0.8rem 0;border-bottom:1px solid var(--border)}
+.reviewer-name{font-weight:600;font-size:0.9rem}
+.review-text{font-size:0.85rem;color:var(--muted);margin-top:0.3rem}
+
+/* CART PAGE */
+#cart-page{display:none}
+.cart-item{background:var(--white);border-radius:12px;padding:1rem;margin-bottom:0.8rem;display:flex;gap:1rem;align-items:center;border:1px solid var(--border)}
+.cart-item img{width:70px;height:70px;object-fit:contain;background:var(--cream);border-radius:8px;padding:5px}
+.cart-item-info{flex:1}
+.cart-item-info h4{font-size:0.9rem;font-weight:500;margin-bottom:0.3rem}
+.cart-item-info .meta{font-size:0.8rem;color:var(--muted)}
+.cart-item-price{font-weight:700;color:var(--teal-dark)}
+.qty-ctrl{display:flex;align-items:center;gap:0.5rem;margin-top:0.4rem}
+.qty-btn{width:26px;height:26px;border:1.5px solid var(--border);border-radius:6px;background:var(--cream);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;font-weight:700}
+.qty-display{width:30px;text-align:center;font-weight:600;font-size:0.9rem}
+.cart-summary{background:var(--white);border-radius:12px;padding:1.2rem;border:1px solid var(--border)}
+.summary-row{display:flex;justify-content:space-between;margin-bottom:0.7rem;font-size:0.9rem}
+.summary-row.total{font-weight:700;font-size:1.1rem;border-top:1px solid var(--border);padding-top:0.7rem;margin-top:0.3rem;color:var(--teal-dark)}
+.btn-checkout{width:100%;padding:1rem;background:var(--accent);color:white;border:none;border-radius:12px;font-family:inherit;font-weight:700;font-size:1rem;cursor:pointer;margin-top:1rem;transition:background 0.2s}
+.btn-checkout:hover{background:#c44010}
+
+/* CHECKOUT PAGE */
+#checkout-page{display:none}
+.checkout-section{background:var(--white);border-radius:12px;padding:1.2rem;margin-bottom:1rem;border:1px solid var(--border)}
+.checkout-section h3{font-size:1rem;font-weight:600;color:var(--teal-dark);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem}
+.payment-option{display:flex;align-items:center;gap:0.8rem;padding:0.8rem;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all 0.2s;margin-bottom:0.6rem}
+.payment-option.selected{border-color:var(--teal);background:var(--teal-pale)}
+.payment-option input[type=radio]{accent-color:var(--teal);width:16px;height:16px}
+.payment-option .pay-icon{font-size:1.5rem}
+.payment-label{font-weight:500;font-size:0.95rem}
+.payment-sublabel{font-size:0.8rem;color:var(--muted)}
+.coming-soon{font-size:0.7rem;background:var(--cream-dark);padding:2px 6px;border-radius:4px;color:var(--muted)}
+.order-success{text-align:center;padding:2rem;display:none}
+.order-success .success-icon{font-size:4rem;margin-bottom:1rem}
+.order-success h2{font-family:'Playfair Display',serif;color:var(--teal-dark);margin-bottom:0.5rem}
+.back-btn{display:flex;align-items:center;gap:0.5rem;background:none;border:none;cursor:pointer;color:var(--teal);font-family:inherit;font-size:1rem;font-weight:500;padding:0.8rem 1.5rem}
+
+/* ORDERS PAGE */
+#orders-page{display:none}
+.order-card{background:var(--white);border-radius:12px;padding:1.2rem;margin-bottom:1rem;border:1px solid var(--border)}
+.order-status{display:inline-block;padding:0.3rem 0.8rem;border-radius:50px;font-size:0.78rem;font-weight:600}
+.status-delivered{background:#d1fae5;color:#065f46}
+.status-shipping{background:#dbeafe;color:#1e40af}
+.status-processing{background:#fef3c7;color:#92400e}
+.status-cancelled{background:#fee2e2;color:#991b1b}
+
+/* ABOUT PAGE */
+#about-page{display:none}
+.about-hero{background:var(--teal-dark);color:white;padding:2rem;text-align:center}
+.about-hero h1{font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:0.5rem}
+.about-card{background:var(--white);border-radius:12px;padding:1.2rem;margin:1rem 1.5rem;border:1px solid var(--border)}
+
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--teal-dark);color:white;padding:0.7rem 1.5rem;border-radius:50px;font-size:0.9rem;font-weight:500;z-index:9999;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* DESKTOP LAYOUT */
+@media(min-width:769px){
+  .bottom-nav{display:none}
+  body{padding-bottom:0}
+  .toast{bottom:2rem}
+
+  /* Desktop header */
+  .header-main{padding:0.8rem 3rem}
+  .search-wrap{max-width:700px}
+  .nav-cats{padding:0.6rem 3rem}
+  .hero-banner{padding:3rem 3rem}
+  .hero-content h1{font-size:2.8rem}
+  .section{padding:2rem 3rem}
+
+  /* Desktop product grid - more columns */
+  .products-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.2rem}
+  .product-img{height:200px}
+
+  /* Desktop nav bar at top */
+  .desktop-nav{display:flex;align-items:center;background:var(--teal-dark);padding:0 3rem;border-bottom:1px solid rgba(255,255,255,0.1)}
+  .desktop-nav-item{color:rgba(255,255,255,0.8);font-size:0.9rem;padding:0.7rem 1rem;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+  .desktop-nav-item:hover,.desktop-nav-item.active{color:white;border-bottom-color:var(--gold)}
+  .desktop-user-bar{display:flex;align-items:center;gap:1.5rem;margin-left:auto}
+  .desktop-user-btn{display:flex;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.85);font-size:0.88rem;cursor:pointer;background:none;border:none;font-family:inherit;transition:color 0.2s}
+  .desktop-user-btn:hover{color:white}
+  .desktop-user-btn svg{width:18px;height:18px}
+
+  /* Product detail desktop layout */
+  #product-detail-page .detail-layout{display:grid;grid-template-columns:1fr 1fr;gap:2rem;padding:2rem 3rem;max-width:1200px;margin:0 auto}
+  #product-detail-page .detail-left{position:sticky;top:80px;height:fit-content}
+  .product-detail-img-wrap{border-radius:16px;border:1px solid var(--border)}
+
+  /* Cart & Checkout desktop */
+  #cart-page .cart-layout, #checkout-page .checkout-layout{max-width:900px;margin:0 auto;padding:2rem 3rem;display:grid;grid-template-columns:1fr 340px;gap:2rem}
+  #orders-page, #about-page{max-width:900px;margin:0 auto;padding:2rem 3rem}
+
+  /* Modal wider */
+  .modal{max-width:520px}
+
+  /* Deals bar */
+  .deals-bar .deal-item{min-width:160px}
+
+  /* Hero */
+  .hero-ship-icon{font-size:12rem}
+}
+
+@media(min-width:1200px){
+  .header-main{padding:0.8rem 4rem}
+  .nav-cats{padding:0.6rem 4rem}
+  .section{padding:2rem 4rem}
+  .desktop-nav{padding:0 4rem}
+  .products-grid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+}
+
+/* MOBILE TWEAKS */
+@media(max-width:480px){
+  .header-main{padding:0.6rem 0.8rem;gap:0.6rem}
+  .logo-text{font-size:0.95rem}
+  .logo-img{width:36px;height:36px}
+  .search-wrap select{display:none}
+  .search-wrap input{font-size:0.85rem}
+  .hero-banner{padding:1.5rem 1rem}
+  .hero-content h1{font-size:1.5rem}
+  .hero-cta{font-size:0.85rem;padding:0.6rem 1rem}
+  .section{padding:1rem}
+  .products-grid{grid-template-columns:repeat(2,1fr);gap:0.6rem}
+  .product-img{height:140px}
+  .product-info{padding:0.6rem}
+  .product-name{font-size:0.82rem}
+  .section-header h2{font-size:1.1rem}
+  .nav-cats{padding:0.5rem 0.8rem}
+  .cat-pill{font-size:0.78rem;padding:0.35rem 0.7rem}
+  .deals-bar .deal-item{min-width:120px;padding:0.6rem 1rem}
+  .modal{margin:0.5rem;border-radius:16px;padding:1.5rem}
+  .otp-inputs input{width:40px;height:44px;font-size:1.2rem}
+}
+
+.payment-option.selected{border-color:var(--teal);background:rgba(26,127,110,.06);}
+.payment-option.selected .payment-label{color:var(--teal);font-weight:700;}
+#order-success{display:none;text-align:center;padding:2.5rem 1rem;}
+#order-success .success-icon{font-size:3rem;margin-bottom:.75rem;}
+#order-success h3{font-size:1.2rem;font-weight:700;color:var(--teal-dark);margin-bottom:.5rem;}
+#order-success p{color:var(--muted);font-size:.9rem;margin-bottom:.25rem;}
+</style>
+
+<script type="module">
+  // ── Firebase SDK ──────────────────────────────────────────────────────────────
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+  import { getAnalytics }    from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged,
+    updateProfile,
+    RecaptchaVerifier,
+    PhoneAuthProvider,
+    signInWithCredential
+  } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+  import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+  // ── Config ────────────────────────────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCV8iwLLdoEsR-7s4quaWi_jsFUefQ5qh0",
+    authDomain:        "younitedshipping-a0516.firebaseapp.com",
+    projectId:         "younitedshipping-a0516",
+    storageBucket:     "younitedshipping-a0516.firebasestorage.app",
+    messagingSenderId: "648325970192",
+    appId:             "1:648325970192:web:db6ccf52d9e5d43211cd95",
+    measurementId:     "G-SX22SWDEGV"
+  };
+
+  const app       = initializeApp(firebaseConfig);
+  // Analytics must never block auth setup: getAnalytics() throws in privacy mode,
+  // in-app browsers, or when measurement is blocked, which would stop every
+  // window.doLogin/doSignup/... assignment below from running.
+  let analytics = null;
+  try { analytics = getAnalytics(app); } catch (e) { console.warn('Analytics unavailable:', e?.message || e); }
+  const auth      = getAuth(app);
+  const db        = getFirestore(app);
+  const gProvider = new GoogleAuthProvider();
+  auth.languageCode = 'en';
+
+  // ── reCAPTCHA ─────────────────────────────────────────────────────────────────
+  let recaptchaVerifier = null;
+  let phoneVerifId      = null;
+  let otpResendTimer    = null;
+
+  function ensureRecaptcha() {
+    // Only create ONCE — never destroy/recreate, that causes "already rendered" error
+    if (!recaptchaVerifier) {
+      recaptchaVerifier = new RecaptchaVerifier(auth, 'shop-recaptcha-container', {
+        size: 'invisible',
+        callback: () => {}
+      });
+    }
+    return recaptchaVerifier;
+  }
+
+  // Pre-render reCAPTCHA silently as soon as the module loads
+  // so it's ready when the user clicks Send OTP
+  try { ensureRecaptcha(); } catch(e) {}
+
+  // ── Sign-in helpers ────────────────────────────────────────────────────────────
+  function onUserSignedIn(fbUser) {
+    window._fbUser = fbUser;
+    user = user || {};
+    // Safe fallback — phone-only users have no email
+    const emailName = fbUser.email ? fbUser.email.split('@')[0] : '';
+    const phoneName = fbUser.phoneNumber ? 'User' + fbUser.phoneNumber.slice(-4) : '';
+    user.name  = fbUser.displayName || user.name || emailName || phoneName || 'User';
+    user.email = fbUser.email || user.email || '';
+    user.phone = fbUser.phoneNumber || user.phone || '';
+    if (typeof updateUserUI === 'function') updateUserUI();
+    if (typeof updateDesktopUserBtn === 'function') updateDesktopUserBtn();
+    if (typeof closeModal === 'function') closeModal('auth-modal');
+    if (typeof showToast === 'function') showToast('Welcome, ' + user.name.split(' ')[0] + '!');
+  }
+
+  function fbError(code) {
+    const m = {
+      'auth/email-already-in-use': 'This email is already registered.',
+      'auth/invalid-email':        'Please enter a valid email.',
+      'auth/weak-password':        'Password must be at least 6 characters.',
+      'auth/user-not-found':       'No account found with this email.',
+      'auth/wrong-password':       'Incorrect password.',
+      'auth/invalid-credential':   'Invalid email or password.',
+      'auth/too-many-requests':    'Too many attempts. Try again later.',
+      'auth/operation-not-allowed':   'Email/password sign-in is turned off for this project (Firebase Console → Authentication → Sign-in method).',
+      'auth/admin-restricted-operation': 'New sign-ups are disabled for this project (Firebase Console → Authentication → Settings).',
+      'auth/unauthorized-domain':     'This domain is not in Firebase → Authentication → Settings → Authorized domains.',
+      'auth/network-request-failed':  'Network error. Check your connection and serve the page over http/https (not file://).',
+      'auth/multi-factor-auth-required': 'This account requires multi-factor authentication, which this page does not support.',
+      'auth/popup-closed-by-user': '',
+      'auth/popup-blocked':        'Pop-up was blocked. Allow pop-ups for Google sign-in, or try email instead.'
+    };
+    return m[code] || ('Something went wrong (' + (code || 'unknown') + '). Please try again.');
+  }
+
+  // ── Email/Password Sign In ─────────────────────────────────────────────────
+  window.doLogin = async function() {
+    const email = (document.getElementById('login-email')||{}).value?.trim();
+    const pass  = (document.getElementById('login-password')||{}).value;
+    if (!email || !pass) { showToast('Please enter email and password'); return; }
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, pass);
+      onUserSignedIn(result.user);
+    } catch(e) {
+      const msg = fbError(e.code);
+      if (msg) showToast(msg);
+    }
+  };
+
+  // ── Email/Password Sign Up ─────────────────────────────────────────────────
+  window.doSignup = async function() {
+    const name  = (document.getElementById('signup-name')||{}).value?.trim();
+    const email = (document.getElementById('signup-email')||{}).value?.trim();
+    const phone = (document.getElementById('signup-phone')||{}).value?.trim();
+    const addr1 = (document.getElementById('signup-addr1')||{}).value?.trim();
+    if (!name || !email || !phone) { showToast('Please fill all required fields'); return; }
+    try {
+      const pass = (document.getElementById('signup-password')||{}).value || Math.random().toString(36).slice(-8);
+      const result = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(result.user, { displayName: name });
+      user = { name, email, phone, addr1, addr2: (document.getElementById('signup-addr2')||{}).value?.trim()||'' };
+      onUserSignedIn(result.user);
+    } catch(e) {
+      const msg = fbError(e.code);
+      if (msg) showToast(msg);
+    }
+  };
+
+  // ── Google Sign In ─────────────────────────────────────────────────────────
+  window.googleSignIn = async function() {
+    try {
+      const result = await signInWithPopup(auth, gProvider);
+      onUserSignedIn(result.user);
+    } catch(e) {
+      const msg = fbError(e.code);
+      if (msg) showToast(msg);
+    }
+  };
+
+  // ── Phone (OTP) Sign In ────────────────────────────────────────────────────
+  window.sendOTP = async function() {
+    let phone = (document.getElementById('login-phone')||{}).value?.trim();
+    if (!phone) { showToast('Enter a mobile number (e.g. +91 9876543210)'); return; }
+    // Auto-prefix +91 for 10-digit Indian numbers
+    if (/^\d{10}$/.test(phone)) phone = '+91' + phone;
+    if (!/^\+\d{10,15}$/.test(phone)) { showToast('Enter number with country code, e.g. +91 9876543210'); return; }
+    // Update the input to show formatted number
+    const inputEl = document.getElementById('login-phone');
+    if (inputEl) inputEl.value = phone;
+    try {
+      const verifier = ensureRecaptcha();
+      await verifier.render();   // ensure invisible reCAPTCHA is ready (matches the working admin flow)
+      const provider = new PhoneAuthProvider(auth);
+      phoneVerifId = await provider.verifyPhoneNumber(phone, verifier);
+      const otpSec = document.getElementById('otp-section');
+      const sendBtn = document.getElementById('send-otp-btn');
+      if (otpSec)  otpSec.style.display  = 'block';
+      if (sendBtn) sendBtn.style.display = 'none';
+      showToast('OTP sent to ' + phone);
+      startOtpResendTimer();
+    } catch(e) {
+      console.error('OTP error:', e);
+      const friendly = {
+        'auth/argument-error':         'Invalid phone number format. Use +91 followed by 10 digits.',
+        'auth/invalid-phone-number':   'Invalid phone number. Use format: +91 9876543210',
+        'auth/too-many-requests':      'Too many OTP requests. Please wait a few minutes.',
+        'auth/captcha-check-failed':   'reCAPTCHA check failed. Please refresh and try again.',
+        'auth/quota-exceeded':         'SMS quota exceeded. Try again later.',
+        'auth/missing-phone-number':   'Please enter a phone number.',
+        'auth/network-request-failed': 'Network error. Check your internet connection.',
+        'auth/operation-not-allowed':  'Phone sign-in is turned off for this project. Enable it in Firebase Console → Authentication → Sign-in method → Phone.',
+        'auth/internal-error':         'Phone sign-in could not start. Usually means the Phone provider is not enabled, the Blaze plan / SMS region (+91) is not set up, or the domain is not authorised. See console for details.',
+        'auth/unauthorized-domain':    'This domain is not in Firebase → Authentication → Settings → Authorized domains.',
+      };
+      showToast(friendly[e.code] || ('Could not send OTP: ' + (e.message || e.code)));
+    }
+  };
+
+  window.verifyOTP = async function() {
+    const code = Array.from(document.querySelectorAll('.otp-input')).map(i=>i.value).join('');
+    if (code.length < 6) { showToast('Enter the complete 6-digit OTP'); return; }
+    try {
+      const cred   = PhoneAuthProvider.credential(phoneVerifId, code);
+      const result = await signInWithCredential(auth, cred);
+      phoneVerifId = null; // reset for next session
+      onUserSignedIn(result.user);
+    } catch(e) {
+      showToast(e.code === 'auth/invalid-verification-code'
+        ? 'Incorrect OTP. Try again.' : (e.message || e.code));
+    }
+  };
+
+  window.resendOTP = async function() {
+    let phone = (document.getElementById('login-phone')||{}).value?.trim();
+    if (/^\d{10}$/.test(phone)) phone = '+91' + phone;
+    if (!phone || !recaptchaVerifier) { showToast('Please refresh and try again.'); return; }
+    try {
+      const provider = new PhoneAuthProvider(auth);
+      phoneVerifId = await provider.verifyPhoneNumber(phone, recaptchaVerifier);
+      showToast('OTP resent to ' + phone);
+      startOtpResendTimer();
+    } catch(e) {
+      showToast('Could not resend OTP: ' + (e.message || e.code));
+    }
+  };
+
+  function startOtpResendTimer(secs=30) {
+    const btn = document.getElementById('resend-otp-btn');
+    if (!btn) return;
+    btn.disabled = true;
+    let s = secs;
+    btn.textContent = 'Resend in ' + s + 's';
+    clearInterval(otpResendTimer);
+    otpResendTimer = setInterval(()=>{
+      s--;
+      if (s <= 0) {
+        clearInterval(otpResendTimer);
+        btn.disabled = false;
+        btn.textContent = 'Resend OTP';
+      } else btn.textContent = 'Resend in ' + s + 's';
+    }, 1000);
+  }
+
+  // ── Sign Out ──────────────────────────────────────────────────────────────
+  window.doSignOut = function() {
+    signOut(auth).then(() => {
+      user = null;
+      window._fbUser = null;
+      if (typeof closeModal === 'function') closeModal('account-modal');
+      if (typeof updateUserUI === 'function') updateUserUI();
+      if (typeof updateDesktopUserBtn === 'function') updateDesktopUserBtn();
+      showToast('Signed out successfully');
+    });
+  };
+
+  // ── Session handling ──────────────────────────────────────────────────────
+  // Always open signed-out: never auto-restore a previous session (e.g. a phone
+  // sign-in from earlier). The very first auth callback fires on page load — if
+  // it carries a restored user, sign it out so the button stays "Sign In". Real
+  // sign-ins (Google / phone +91 / email) come through the button and update the
+  // UI via onUserSignedIn, so on-demand login still works.
+  let _authBootstrapped = false;
+  onAuthStateChanged(auth, (fbUser) => {
+    if (!_authBootstrapped) {
+      _authBootstrapped = true;
+      if (fbUser) { signOut(auth).catch(() => {}); }   // clear auto-restored session
+      return;                                          // keep label as "Sign In"
+    }
+    if (fbUser) {
+      window._fbUser = fbUser;
+      if (!user) {
+        user = {
+          name: fbUser.displayName || fbUser.email?.split('@')[0] || 'User',
+          email: fbUser.email || '',
+          phone: fbUser.phoneNumber || ''
+        };
+      }
+      if (typeof updateUserUI === 'function') updateUserUI();
+      if (typeof updateDesktopUserBtn === 'function') updateDesktopUserBtn();
+    }
+  });
+
+  // ── Firestore real-time products listener ─────────────────────────────────
+  onSnapshot(collection(db, 'products'), (snapshot) => {
+    const firestoreProducts = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const variants = Array.isArray(data.variants)
+        ? data.variants.filter(v => v && v.label != null).map(v => ({ label: String(v.label), price: Number(v.price) || 0 }))
+        : [];
+      const basePrice = variants.length ? Math.min(...variants.map(v => v.price)) : (data.price || 0);
+      firestoreProducts.push({
+        id: doc.id,
+        name: data.name || 'Unnamed Product',
+        cat: data.category || 'other',
+        price: basePrice,
+        oldPrice: data.oldPrice || data.price || basePrice,
+        img: data.img || window.IMG_PLACEHOLDER || '',
+        badge: data.badge || (data.oldPrice > basePrice ? `${Math.round((1 - basePrice / data.oldPrice) * 100)}% OFF` : ''),
+        rating: data.rating || 0,
+        reviews: data.reviews || 0,
+        desc: data.description || '',
+        delivery: '3-5 days',
+        brand: data.brand || '',
+        stock: data.stock || 0,
+        shipping: Number(data.shipping) || 0,
+        variantType: data.variantType || 'Variant',
+        variants: variants,
+        colors: Array.isArray(data.colors) ? data.colors : []
+      });
+    });
+
+    if (firestoreProducts.length > 0) {
+      // Replace PRODUCTS array with live Firestore data
+      window.FIRESTORE_PRODUCTS = firestoreProducts;
+      if (typeof renderProducts === 'function') {
+        renderProducts(firestoreProducts);
+        document.getElementById('products-heading').textContent = 'All Products';
+      }
+    }
+  }, (error) => {
+    console.error('Firestore listener error:', error);
+  });
+
+  // ── Save order to Firestore + decrement stock ─────────────────────────────
+  window.saveOrderToFirestore = async function(orderData) {
+    try {
+      await addDoc(collection(db, 'orders'), orderData);
+      // Atomically reduce stock for each ordered item so it actually depletes
+      if (Array.isArray(orderData.items)) {
+        for (const it of orderData.items) {
+          if (it && it.id && it.qty) {
+            try { await updateDoc(doc(db, 'products', it.id), { stock: increment(-it.qty) }); }
+            catch(e) { console.error('Stock decrement failed for', it.id, e); }
+          }
+        }
+      }
+    } catch(e) {
+      console.error('Order save error:', e);
+    }
+  };
+</script>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== AUTH MODAL ===== -->
+<div class="overlay" id="auth-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('auth-modal')">✕</button>
+    <img class="modal-logo" id="auth-logo" src="" alt="Younited Shipping Logo">
+    <h2 id="auth-title">Welcome Back</h2>
+    <p class="subtitle" id="auth-subtitle">Sign in to your Younited Shipping account</p>
+
+    <!-- AUTH TABS -->
+    <div class="tab-group" id="auth-tabs">
+      <button class="tab-btn active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="tab-btn" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="login-form-wrap">
+      <div class="tab-group">
+        <button class="tab-btn active" onclick="switchLoginType('email-login')" id="tab-email-login">Email</button>
+        <button class="tab-btn" onclick="switchLoginType('phone-login')" id="tab-phone-login">Mobile</button>
+      </div>
+      <div id="email-login">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="you@example.com" id="login-email">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" placeholder="Enter your password" id="login-password">
+        </div>
+        <button class="btn-primary" onclick="doLogin()">Sign In</button>
+      </div>
+      <div id="phone-login" style="display:none">
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="tel" placeholder="+91 9876543210" id="login-phone">
+        </div>
+        <div id="otp-section" style="display:none">
+          <div class="form-group">
+            <label>Enter OTP sent to your number</label>
+            <div class="otp-inputs">
+              <input type="text" maxlength="1" class="otp-input">
+              <input type="text" maxlength="1" class="otp-input">
+              <input type="text" maxlength="1" class="otp-input">
+              <input type="text" maxlength="1" class="otp-input">
+              <input type="text" maxlength="1" class="otp-input">
+              <input type="text" maxlength="1" class="otp-input">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="verifyOTP()">Verify OTP</button>
+          <p style="text-align:center;margin-top:0.7rem;font-size:0.85rem;color:var(--muted)">Didn't receive? <button class="link-btn">Resend OTP</button></p>
+        </div>
+        <div id="shop-recaptcha-container"></div>
+        <button class="btn-primary" id="send-otp-btn" onclick="sendOTP()">Send OTP</button>
+        <button class="btn-primary" id="resend-otp-btn" onclick="sendOTP()" style="display:none;background:var(--cream);color:var(--teal);margin-top:0.5rem">Resend OTP</button>
+      </div>
+      <div class="divider">or</div>
+      <button class="btn-outline" onclick="googleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signup-form-wrap" style="display:none">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" placeholder="Your full name" id="signup-name">
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" placeholder="you@example.com" id="signup-email">
+      </div>
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="tel" placeholder="+91 9876543210" id="signup-phone">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" placeholder="Min. 8 characters" id="signup-password">
+      </div>
+      <div class="form-group">
+        <label>Delivery Address</label>
+        <input type="text" placeholder="House No, Street, Area" id="signup-addr1" style="margin-bottom:0.4rem">
+        <input type="text" placeholder="City, State, PIN Code" id="signup-addr2">
+      </div>
+      <button class="btn-primary" onclick="doSignup()">Create Account</button>
+      <div class="divider">or</div>
+      <button class="btn-outline" onclick="googleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Sign Up with Google
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ACCOUNT MODAL ===== -->
+<div class="overlay" id="account-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('account-modal')">✕</button>
+    <img class="modal-logo" id="account-logo" src="" alt="Younited Shipping Logo">
+    <h2>My Account</h2>
+    <p class="subtitle">Your Younited Shipping account</p>
+    <div id="account-details" style="margin:1.2rem 0"></div>
+    <button class="btn-primary" onclick="doSignOut()">Logout</button>
+  </div>
+</div>
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="header-main">
+    <a href="#" class="logo-wrap" onclick="showPage('home')">
+      <img class="logo-img" id="main-logo" src="" alt="Younited Shipping">
+      <div class="logo-text">YOUNITED<span>SHIPPING</span></div>
+    </a>
+    <div class="search-wrap">
+      <select id="search-cat">
+        <option>All</option>
+        <option>Fashion</option>
+        <option>Electronics</option>
+        <option>Mobiles</option>
+        <option>Furniture</option>
+        <option>Groceries</option>
+        <option>Books</option>
+      </select>
+      <input type="text" placeholder="Search products, brands and more..." id="search-input">
+      <button onclick="doSearch()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </button>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="handleUserClick()" id="user-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        <span id="user-label">Sign In</span>
+      </button>
+      <button class="icon-btn" onclick="showPage('cart')" style="position:relative">
+        <div class="cart-badge" id="cart-badge">0</div>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-9H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m10.5-6l1.5 6M10 19a1 1 0 100 2 1 1 0 000-2zm8 0a1 1 0 100 2 1 1 0 000-2z"/></svg>
+        Cart
+      </button>
+    </div>
+  </div>
+  <div class="header-divider"></div>
+
+  <!-- CATEGORIES NAV -->
+  <nav class="nav-cats" id="nav-cats">
+    <button class="cat-pill active" onclick="filterCat('all')">All</button>
+    <button class="cat-pill" onclick="filterCat('fashion')">Fashion & Dress</button>
+    <button class="cat-pill" onclick="filterCat('electronics')">Electronics</button>
+    <button class="cat-pill" onclick="filterCat('mobile')">Mobiles & Accessories</button>
+    <button class="cat-pill" onclick="filterCat('furniture')">Furniture</button>
+    <button class="cat-pill" onclick="filterCat('grocery')">Grocery</button>
+    <button class="cat-pill" onclick="filterCat('books')">Books</button>
+    <button class="cat-pill" onclick="filterCat('sports')">Sports</button>
+    <button class="cat-pill" onclick="filterCat('beauty')">Beauty</button>
+    <button class="cat-pill" onclick="filterCat('toys')">Toys & Baby</button>
+    <button class="cat-pill" onclick="filterCat('kitchen')">Kitchen</button>
+    <button class="cat-pill" onclick="filterCat('automotive')">Automotive</button>
+    <button class="cat-pill" onclick="filterCat('health')">Health & Pharma</button>
+  </nav>
+</header>
+<div class="section-divider"></div>
+
+<!-- ===== HOME PAGE ===== -->
+<div id="home-page">
+  <!-- HERO -->
+  <div class="hero-banner">
+    <div class="hero-content">
+      <h1>Fast Delivery,<br>Trusted Shipping</h1>
+      <p>Shop from thousands of products delivered right to your doorstep across India.</p>
+      <button class="hero-cta" onclick="document.getElementById('products-section').scrollIntoView({behavior:'smooth'})">
+        Shop Now →
+      </button>
+    </div>
+    <div class="hero-ship-icon">🚢</div>
+  </div>
+
+  <!-- DEALS BAR -->
+  <div class="deals-bar">
+    <div class="deal-item"><div class="deal-label">TODAY'S DEALS</div><div class="deal-val">Up to 70% Off</div></div>
+    <div class="deal-item"><div class="deal-label">FREE DELIVERY</div><div class="deal-val">Orders ₹499+</div></div>
+    <div class="deal-item"><div class="deal-label">FLASH SALE</div><div class="deal-val">12:00 - 14:00</div></div>
+    <div class="deal-item"><div class="deal-label">NEW ARRIVALS</div><div class="deal-val">200+ Items</div></div>
+    <div class="deal-item"><div class="deal-label">EASY RETURNS</div><div class="deal-val">7 Day Policy</div></div>
+  </div>
+  <div class="section-divider"></div>
+
+  <!-- PRODUCTS -->
+  <div class="section" id="products-section">
+    <div class="section-header">
+      <h2 id="products-heading">Featured Products</h2>
+      <button class="see-all" onclick="showToast('Showing all products')">See All</button>
+    </div>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+</div>
+
+<!-- ===== PRODUCT DETAIL PAGE ===== -->
+<div id="product-detail-page">
+  <button class="back-btn" onclick="showPage('home')">← Back</button>
+  <div class="product-detail-img-wrap">
+    <img id="detail-main-img" src="" alt="">
+    <div class="thumbnails" id="detail-thumbs"></div>
+  </div>
+  <div class="product-detail-info">
+    <h1 id="detail-name"></h1>
+    <div class="stars" id="detail-stars"></div>
+    <div class="product-price" style="margin-bottom:0.5rem">
+      <span class="price-current" id="detail-price"></span>
+      <span class="price-old" id="detail-old-price"></span>
+      <span class="price-off" id="detail-discount"></span>
+    </div>
+    <p id="detail-desc" style="font-size:0.9rem;color:var(--muted);line-height:1.6"></p>
+    <div class="delivery-info" style="margin-top:1rem">
+      🚚 <strong>Free Delivery</strong> — Estimated <span id="detail-delivery"></span>
+    </div>
+  </div>
+
+  <!-- VARIANTS -->
+  <div class="variants-section" id="variants-section"></div>
+
+  <!-- ORDER ACTIONS -->
+  <div class="order-section">
+    <div class="action-buttons">
+      <button class="btn-cart" id="detail-add-btn" onclick="addToCartCurrent()">🛒 Add to Cart</button>
+      <button class="btn-buy" id="detail-buy-btn" onclick="buyNow()">⚡ Buy Now</button>
+      <button class="share-btn" onclick="shareProduct()" title="Share">↗</button>
+    </div>
+  </div>
+
+  <!-- SUGGESTIONS -->
+  <div class="section">
+    <div class="section-header"><h2>Similar Products</h2></div>
+    <div class="products-grid" id="similar-grid"></div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div class="reviews-section">
+    <h3>⭐ Ratings & Reviews</h3>
+    <div id="reviews-list"></div>
+    <div style="margin-top:1rem">
+      <p style="font-weight:600;font-size:0.9rem;margin-bottom:0.5rem">Write a Review</p>
+      <div style="display:flex;gap:5px;margin-bottom:0.5rem" id="review-stars">
+        <span style="cursor:pointer;font-size:1.5rem" onclick="setReviewStar(1)">☆</span>
+        <span style="cursor:pointer;font-size:1.5rem" onclick="setReviewStar(2)">☆</span>
+        <span style="cursor:pointer;font-size:1.5rem" onclick="setReviewStar(3)">☆</span>
+        <span style="cursor:pointer;font-size:1.5rem" onclick="setReviewStar(4)">☆</span>
+        <span style="cursor:pointer;font-size:1.5rem" onclick="setReviewStar(5)">☆</span>
+      </div>
+      <textarea id="review-text" rows="3" placeholder="Share your experience with this product..." style="width:100%;padding:0.75rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.9rem;resize:none;background:var(--cream)"></textarea>
+      <button class="btn-primary" style="margin-top:0.5rem" onclick="submitReview()">Submit Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CART PAGE ===== -->
+<div id="cart-page">
+  <button class="back-btn" onclick="showPage('home')">← Continue Shopping</button>
+  <div class="section">
+    <h2 style="font-family:'Playfair Display',serif;color:var(--teal-dark);margin-bottom:1rem">🛒 My Cart</h2>
+    <div id="cart-items-list"></div>
+    <div class="cart-summary" id="cart-summary"></div>
+  </div>
+</div>
+
+<!-- ===== CHECKOUT PAGE ===== -->
+<div id="checkout-page">
+  <button class="back-btn" onclick="showPage('cart')">← Back to Cart</button>
+  <div class="section">
+    <h2 style="font-family:'Playfair Display',serif;color:var(--teal-dark);margin-bottom:1rem">📦 Place Order</h2>
+
+    <div class="checkout-section">
+      <h3>📍 Delivery Address</h3>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="co-name" placeholder="Enter full name">
+      </div>
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="tel" id="co-phone" placeholder="+91 9876543210">
+      </div>
+      <div class="form-group">
+        <label>Address Line 1</label>
+        <input type="text" id="co-addr1" placeholder="House No, Street, Locality">
+      </div>
+      <div class="form-group">
+        <label>Address Line 2</label>
+        <input type="text" id="co-addr2" placeholder="City, State, PIN Code">
+      </div>
+    </div>
+
+    <div class="checkout-section">
+      <h3>💳 Payment Method</h3>
+      <div class="payment-option selected" id="pay-cod">
+        <input type="radio" name="payment" checked>
+        <span class="pay-icon">💵</span>
+        <div>
+          <div class="payment-label">Cash on Delivery</div>
+          <div class="payment-sublabel">Pay when your order arrives</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-summary">
+      <div id="checkout-summary-rows"></div>
+      <button class="btn-checkout" onclick="placeOrder()">✅ Place Order</button>
+    </div>
+
+    <div class="order-success" id="order-success">
+      <div class="success-icon">🎉</div>
+      <h2>Order Placed Successfully!</h2>
+      <p style="color:var(--muted);margin-bottom:1rem">Your order has been confirmed. Estimated delivery: <strong id="order-delivery-date"></strong></p>
+      <p style="font-size:0.85rem;color:var(--muted)">Order ID: <strong id="order-id"></strong></p>
+      <button class="btn-primary" style="margin-top:1.5rem" onclick="showPage('home')">Continue Shopping</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ORDERS PAGE ===== -->
+<div id="orders-page">
+  <div class="section">
+    <h2 style="font-family:'Playfair Display',serif;color:var(--teal-dark);margin-bottom:1rem">📋 My Orders</h2>
+    <div id="orders-list"></div>
+  </div>
+</div>
+
+<!-- ===== ABOUT PAGE ===== -->
+<div id="about-page">
+  <div class="about-hero">
+    <img src="" id="about-logo" style="width:70px;border-radius:50%;margin-bottom:1rem;border:3px solid rgba(255,255,255,0.4)">
+    <h1>Younited Shipping</h1>
+    <p style="opacity:0.8;margin-top:0.3rem">Delivering Trust, One Package at a Time</p>
+  </div>
+  <div class="about-card">
+    <h3 style="color:var(--teal-dark);margin-bottom:0.5rem">About Us</h3>
+    <p style="font-size:0.9rem;color:var(--muted);line-height:1.7">Younited Shipping is your one-stop e-commerce platform offering a wide range of products — from fashion and electronics to furniture and groceries. We are committed to fast, reliable delivery across India with a focus on customer satisfaction.</p>
+  </div>
+  <div class="about-card">
+    <h3 style="color:var(--teal-dark);margin-bottom:0.8rem">Why Choose Us?</h3>
+    <div style="display:flex;flex-direction:column;gap:0.6rem">
+      <div style="display:flex;align-items:center;gap:0.7rem"><span style="font-size:1.3rem">🚚</span><div><strong>Fast Delivery</strong><p style="font-size:0.83rem;color:var(--muted)">Express shipping within 2-5 business days</p></div></div>
+      <div style="display:flex;align-items:center;gap:0.7rem"><span style="font-size:1.3rem">🔒</span><div><strong>Secure Shopping</strong><p style="font-size:0.83rem;color:var(--muted)">Your data is safe with us</p></div></div>
+      <div style="display:flex;align-items:center;gap:0.7rem"><span style="font-size:1.3rem">↩️</span><div><strong>Easy Returns</strong><p style="font-size:0.83rem;color:var(--muted)">7-day hassle-free return policy</p></div></div>
+      <div style="display:flex;align-items:center;gap:0.7rem"><span style="font-size:1.3rem">📞</span><div><strong>24/7 Support</strong><p style="font-size:0.83rem;color:var(--muted)">We're always here to help</p></div></div>
+    </div>
+  </div>
+  <div class="about-card">
+    <h3 style="color:var(--teal-dark);margin-bottom:0.5rem">Contact Us</h3>
+    <p style="font-size:0.88rem;color:var(--muted);line-height:1.9">📧 <a href="mailto:younitedshipping@gmail.com" style="color:var(--teal);text-decoration:none">younitedshipping@gmail.com</a><br>📞 <a href="tel:+918681030006" style="color:var(--teal);text-decoration:none">+91 8681030006</a><br>📍 Komarapalayam, Tamil Nadu<br>🕐 Mon–Sat, 9 AM – 7 PM</p>
+  </div>
+</div>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav style="position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1.5px solid var(--border);display:flex;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.1)">
+  <button class="nav-tab active" id="nav-home" onclick="showPage('home')">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+    Home
+  </button>
+  <button class="nav-tab" id="nav-cart" onclick="showPage('cart')" style="position:relative">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-9H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m10.5-6l1.5 6M10 19a1 1 0 100 2 1 1 0 000-2zm8 0a1 1 0 100 2 1 1 0 000-2z"/></svg>
+    My Cart
+  </button>
+  <button class="nav-tab" id="nav-orders" onclick="showPage('orders')">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+    My Orders
+  </button>
+  <button class="nav-tab" id="nav-about" onclick="showPage('about')">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    About
+  </button>
+</nav>
+
+<script>
+// ===== DATA =====
+const LOGO_SRC = 'data:image/jpeg;base64,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';
+
+const PRODUCTS = []; // Products loaded live from Firestore via onSnapshot
+// Self-contained image placeholder (data URI) — cannot fail to load, so it can
+// never re-trigger an <img> onerror. This replaces via.placeholder.com, whose
+// failures were causing an onerror→reload loop (flickering + blank images).
+const IMG_PLACEHOLDER = 'data:image/svg+xml,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300">' +
+  '<rect width="300" height="300" fill="#e8f4f3"/>' +
+  '<g fill="none" stroke="#1a5f5e" stroke-width="2" opacity="0.4">' +
+  '<rect x="105" y="100" width="90" height="72" rx="6"/>' +
+  '<circle cx="130" cy="126" r="9"/>' +
+  '<path d="M112 165l26-24 18 16 16-14 24 20"/></g>' +
+  '<text x="150" y="212" font-family="sans-serif" font-size="15" fill="#1a5f5e" text-anchor="middle" opacity="0.7">No Image</text>' +
+  '</svg>'
+);
+window.IMG_PLACEHOLDER = IMG_PLACEHOLDER;
+
+let cart   = (() => { try { return JSON.parse(localStorage.getItem('ys_cart')   || '[]'); } catch { return []; } })();
+let orders = (() => { try { return JSON.parse(localStorage.getItem('ys_orders') || '[]'); } catch { return []; } })();
+let user   = null;   // Firebase owns auth now; always start signed-out. (ys_user is no longer read/written.)
+let currentProduct = null;
+let currentVariant = null;
+let reviewRating = 0;
+let currentCat = 'all';
+
+// ===== INIT =====
+function init(){
+  document.querySelectorAll('#main-logo,#auth-logo,#about-logo,#account-logo').forEach(el=>el.src=LOGO_SRC);
+  updateCartBadge();
+  if(user) updateUserUI();
+  renderProducts(PRODUCTS); // Will be replaced by Firestore onSnapshot when data loads
+  const grid=document.getElementById('products-grid');
+  if(!PRODUCTS.length) grid.innerHTML='<div style="text-align:center;padding:3rem;color:var(--muted)"><div style="font-size:2rem;margin-bottom:1rem">🔄</div><p>Loading products...</p></div>';
+  setupOTPInputs();
+}
+
+// ===== PAGES =====
+const pages = ['home','product-detail','cart','checkout','orders','about'];
+function showPage(p){
+  pages.forEach(name=>{
+    const el = document.getElementById(name+'-page');
+    if(el) el.style.display = 'none';
+  });
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const pageEl = document.getElementById(p+'-page');
+  if(pageEl){ pageEl.style.display='block'; window.scrollTo(0,0); }
+  const navEl = document.getElementById('nav-'+p);
+  if(navEl) navEl.classList.add('active');
+  if(p==='cart') renderCart();
+  if(p==='orders') renderOrders();
+  if(p==='checkout') renderCheckoutSummary();
+}
+
+// ===== AUTH =====
+function openModal(id){document.getElementById(id).classList.add('active')}
+function closeModal(id){document.getElementById(id).classList.remove('active')}
+function handleUserClick(){
+  if(user){ openAccount(); }
+  else openModal('auth-modal');
+}
+function openAccount(){
+  if(!user){ openModal('auth-modal'); return; }
+  const row = (label,val)=>`<div style="display:flex;justify-content:space-between;gap:1rem;padding:0.7rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted);font-size:0.85rem">${label}</span><span style="font-weight:600;font-size:0.9rem;color:var(--teal-dark);text-align:right;word-break:break-word">${val}</span></div>`;
+  let html='';
+  html+=row('Name', user.name||'—');
+  if(user.email) html+=row('Email', user.email);
+  if(user.phone) html+=row('Mobile', user.phone);
+  const addr=[user.addr1,user.addr2].filter(Boolean).join(', ');
+  if(addr) html+=row('Address', addr);
+  document.getElementById('account-details').innerHTML=html;
+  openModal('account-modal');
+}
+function switchAuthTab(tab){
+  document.querySelectorAll('#auth-tabs .tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active', (tab==='login'&&i===0)||(tab==='signup'&&i===1));
+  });
+  document.getElementById('login-form-wrap').style.display = tab==='login'?'block':'none';
+  document.getElementById('signup-form-wrap').style.display = tab==='signup'?'block':'none';
+  document.getElementById('auth-title').textContent = tab==='login'?'Welcome Back':'Create Account';
+  document.getElementById('auth-subtitle').textContent = tab==='login'?'Sign in to your Younited Shipping account':'Join Younited Shipping today';
+}
+function switchLoginType(type){
+  document.getElementById('email-login').style.display = type==='email-login'?'block':'none';
+  document.getElementById('phone-login').style.display = type==='phone-login'?'block':'none';
+  document.getElementById('tab-email-login').classList.toggle('active',type==='email-login');
+  document.getElementById('tab-phone-login').classList.toggle('active',type==='phone-login');
+}
+// Auth functions now handled by Firebase module above.
+// Thin fallbacks in case module hasn't loaded:
+if(typeof window.doLogin!=='function')   window.doLogin   = ()=>showToast('Loading auth...');
+if(typeof window.doSignup!=='function')  window.doSignup  = ()=>showToast('Loading auth...');
+if(typeof window.googleSignIn!=='function') window.googleSignIn = ()=>showToast('Loading auth...');
+if(typeof window.sendOTP!=='function')   window.sendOTP   = ()=>showToast('Loading auth...');
+if(typeof window.verifyOTP!=='function') window.verifyOTP = ()=>showToast('Loading auth...');
+function updateUserUI(){
+  document.getElementById('user-label').textContent = user ? user.name.split(' ')[0] : 'Sign In';
+}
+function setupOTPInputs(){
+  document.querySelectorAll('.otp-input').forEach((inp,i,arr)=>{
+    inp.addEventListener('input',()=>{ if(inp.value&&arr[i+1]) arr[i+1].focus(); });
+    inp.addEventListener('keydown',e=>{ if(e.key==='Backspace'&&!inp.value&&arr[i-1]) arr[i-1].focus(); });
+  });
+}
+
+// ===== PRODUCTS =====
+function renderProducts(prods){
+  const grid = document.getElementById('products-grid');
+  grid.innerHTML = prods.map(p=>{
+    const out=(p.stock||0)<=0;
+    return `
+    <div class="product-card" onclick="openProduct('${p.id}')">
+      ${out?`<div class="product-badge" style="background:#9aa3a2">Out of Stock</div>`:(p.badge?`<div class="product-badge">${p.badge}</div>`:'')}
+      <button class="product-wishlist" onclick="event.stopPropagation();toggleWishlist(this)" title="Wishlist">♡</button>
+      <img class="product-img" src="${p.img||window.IMG_PLACEHOLDER}" alt="${p.name}" onerror="this.onerror=null;this.src=window.IMG_PLACEHOLDER" style="${out?'opacity:0.55':''}">
+
+      <div class="product-info">
+        <div class="stars">${renderStars(p.rating)} <span class="star-count">(${p.reviews})</span></div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-meta">${p.brand}</div>
+        <div class="product-price">
+          <span class="price-current">${(p.variants&&p.variants.length)?'from ':''}₹${p.price.toLocaleString()}</span>
+          ${(p.variants&&p.variants.length)?'':`<span class="price-old">₹${p.oldPrice.toLocaleString()}</span>`}
+        </div>
+        ${out
+          ? `<button class="btn-add-cart" disabled style="opacity:0.5;cursor:not-allowed" onclick="event.stopPropagation()">Out of Stock</button>`
+          : (p.variants&&p.variants.length)
+            ? `<button class="btn-add-cart" onclick="event.stopPropagation();openProduct('${p.id}')">Select Options</button>`
+            : `<button class="btn-add-cart" onclick="event.stopPropagation();addToCart('${p.id}')">Add to Cart</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderStars(r){
+  let s='';
+  for(let i=1;i<=5;i++) s+=`<span class="star">${i<=Math.round(r)?'★':'☆'}</span>`;
+  return s+` <span style="font-size:0.8rem;color:var(--muted)">${r}</span>`;
+}
+function getActiveProducts(){ return (window.FIRESTORE_PRODUCTS && window.FIRESTORE_PRODUCTS.length) ? window.FIRESTORE_PRODUCTS : PRODUCTS; }
+function filterCat(cat){
+  currentCat=cat;
+  document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('active'));
+  event.target.classList.add('active');
+  const all=getActiveProducts();
+  const filtered = cat==='all'?all:all.filter(p=>p.cat===cat);
+  document.getElementById('products-heading').textContent = cat==='all'?'All Products':cat.charAt(0).toUpperCase()+cat.slice(1)+' Products';
+  renderProducts(filtered);
+  showPage('home');
+}
+function doSearch(){
+  const q = document.getElementById('search-input').value.toLowerCase();
+  if(!q) return;
+  const all=getActiveProducts();
+  const results = all.filter(p=>p.name.toLowerCase().includes(q)||(p.brand||'').toLowerCase().includes(q)||p.cat.toLowerCase().includes(q));
+  renderProducts(results.length?results:all);
+  document.getElementById('products-heading').textContent = results.length?`Results for "${q}"`:`No results — showing all`;
+  showPage('home');
+}
+
+// ===== PRODUCT DETAIL =====
+function openProduct(id){
+  currentProduct = getActiveProducts().find(p=>p.id===id);
+  if(!currentProduct) return;
+  const p = currentProduct;
+  currentVariant = (p.variants && p.variants.length)
+    ? { label: p.variants[0].label, price: p.variants[0].price }
+    : { label: '', price: p.price };
+  document.getElementById('detail-main-img').src = p.img;
+  document.getElementById('detail-main-img').onerror = function(){this.onerror=null;this.src=window.IMG_PLACEHOLDER};
+  document.getElementById('detail-name').textContent = p.name;
+  document.getElementById('detail-stars').innerHTML = renderStars(p.rating)+` <span style="font-size:0.82rem;color:var(--muted)">${p.reviews} ratings</span>`;
+  document.getElementById('detail-price').textContent = '₹'+currentVariant.price.toLocaleString();
+  document.getElementById('detail-old-price').textContent = '₹'+p.oldPrice.toLocaleString();
+  const disc = p.oldPrice>currentVariant.price ? Math.round((1-currentVariant.price/p.oldPrice)*100) : 0;
+  document.getElementById('detail-discount').textContent = disc>0 ? disc+'% off' : '';
+  document.getElementById('detail-desc').textContent = p.desc;
+  document.getElementById('detail-delivery').textContent = p.delivery;
+  // Thumbnails
+  const thumbs = [p.img];
+  document.getElementById('detail-thumbs').innerHTML = thumbs.map((t,i)=>`<img class="thumb ${i===0?'active':''}" src="${t}" alt="">`).join('');
+  // Variants
+  renderVariants(p);
+  // Similar
+  const similar = getActiveProducts().filter(pr=>pr.cat===p.cat&&pr.id!==p.id).slice(0,4);
+  document.getElementById('similar-grid').innerHTML = similar.map(pr=>`
+    <div class="product-card" onclick="openProduct('${pr.id}')">
+      ${pr.badge?`<div class="product-badge">${pr.badge}</div>`:''}
+      <img class="product-img" src="${pr.img}" alt="${pr.name}">
+      <div class="product-info">
+        <div class="product-name">${pr.name}</div>
+        <div class="product-price"><span class="price-current">₹${pr.price.toLocaleString()}</span></div>
+      </div>
+    </div>
+  `).join('');
+  // Reviews
+  renderReviews(p);
+  // Stock state — disable purchase when out of stock
+  const addBtn=document.getElementById('detail-add-btn');
+  const buyBtn=document.getElementById('detail-buy-btn');
+  const out=(p.stock||0)<=0;
+  if(addBtn){ addBtn.disabled=out; addBtn.style.opacity=out?'0.5':''; addBtn.style.cursor=out?'not-allowed':''; addBtn.innerHTML=out?'Out of Stock':'🛒 Add to Cart'; }
+  if(buyBtn){ buyBtn.disabled=out; buyBtn.style.opacity=out?'0.5':''; buyBtn.style.cursor=out?'not-allowed':''; }
+  showPage('product-detail');
+}
+function renderVariants(p){
+  let html = '';
+  if(p.colors && p.colors.length){
+    html+=`<span class="variant-label">Color</span><div class="color-options">`;
+    p.colors.forEach((c,i)=>{ html+=`<div class="color-opt ${i===0?'active':''}" style="background:${c}" onclick="selectColor(this,event)" title="${c}"></div>`; });
+    html+='</div>';
+  }
+  if(p.variants && p.variants.length){
+    const vlabel = p.variantType || 'Variant';
+    html+=`<span class="variant-label">${vlabel}</span><div class="size-options">`;
+    p.variants.forEach((v,i)=>{
+      const safe=String(v.label).replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      html+=`<div class="size-opt ${i===0?'active':''}" data-label="${safe}" data-price="${v.price}" onclick="selectVariant(this)">${v.label} · ₹${v.price.toLocaleString()}</div>`;
+    });
+    html+='</div>';
+  }
+  document.getElementById('variants-section').innerHTML = html?`<h3>Choose Variants</h3>${html}`:'';
+}
+function selectVariant(el){
+  el.closest('.size-options').querySelectorAll('.size-opt').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const price=Number(el.getAttribute('data-price'))||0;
+  currentVariant={ label: el.getAttribute('data-label')||'', price };
+  document.getElementById('detail-price').textContent='₹'+price.toLocaleString();
+  const op=currentProduct?currentProduct.oldPrice:0;
+  document.getElementById('detail-discount').textContent = op>price ? Math.round((1-price/op)*100)+'% off' : '';
+}
+function selectColor(el,e){ e.stopPropagation(); el.closest('.color-options').querySelectorAll('.color-opt').forEach(c=>c.classList.remove('active')); el.classList.add('active'); }
+function selectOpt(el,cls){ el.closest('.'+cls).querySelectorAll('.size-opt,.color-opt').forEach(c=>c.classList.remove('active')); el.classList.add('active'); }
+function renderReviews(p){
+  const sampleReviews = [
+    {user:'Arun K.',rating:5,text:'Excellent product! Exactly as described. Fast delivery too.'},
+    {user:'Priya M.',rating:4,text:'Good quality for the price. Would recommend.'},
+    {user:'Ravi S.',rating:3,text:'Decent product, packaging could be better.'}
+  ];
+  document.getElementById('reviews-list').innerHTML = sampleReviews.map(r=>`
+    <div class="review-item">
+      <div class="stars">${renderStars(r.rating)}</div>
+      <div class="reviewer-name">${r.user}</div>
+      <div class="review-text">${r.text}</div>
+    </div>
+  `).join('');
+}
+function setReviewStar(n){
+  reviewRating=n;
+  document.querySelectorAll('#review-stars span').forEach((s,i)=>{ s.textContent=i<n?'★':'☆'; s.style.color=i<n?'var(--gold)':''; });
+}
+function submitReview(){
+  if(!user){ openModal('auth-modal'); showToast('Please sign in to review'); return; }
+  const text = document.getElementById('review-text').value.trim();
+  if(!text||!reviewRating){ showToast('Please add stars and review'); return; }
+  const newReview = document.createElement('div');
+  newReview.className='review-item';
+  newReview.innerHTML=`<div class="stars">${renderStars(reviewRating)}</div><div class="reviewer-name">${user.name}</div><div class="review-text">${text}</div>`;
+  document.getElementById('reviews-list').prepend(newReview);
+  document.getElementById('review-text').value='';
+  setReviewStar(0);
+  showToast('Review submitted!');
+}
+function shareProduct(){
+  if(navigator.share&&currentProduct){ navigator.share({title:currentProduct.name,text:'Check this out!',url:window.location.href}).catch(()=>{}); }
+  else{ navigator.clipboard.writeText(window.location.href).then(()=>showToast('Link copied!')).catch(()=>showToast('Share: '+window.location.href)); }
+}
+
+// ===== CART =====
+function _addLine(p, v){
+  if(!user){ openModal('auth-modal'); showToast('Please sign in to add to cart'); return; }
+  if((p.stock||0) <= 0){ showToast(p.name + ' is out of stock'); return; }
+  const variantLabel = (v && v.label) ? v.label : '';
+  const unitPrice = (v && v.price!=null) ? v.price : p.price;
+  const key = String(p.id) + (variantLabel ? '::'+variantLabel : '');
+  const existing = cart.find(i=>String(i.key||i.id)===key);
+  const curQty = existing ? existing.qty : 0;
+  if(curQty + 1 > (p.stock||0)){ showToast('Only ' + p.stock + ' left in stock'); return; }
+  if(existing){ existing.qty++; }
+  else {
+    cart.push({ id:p.id, key, name:p.name, brand:p.brand, img:p.img,
+                price:unitPrice, variant:variantLabel, shipping:(p.shipping||0), qty:1 });
+  }
+  localStorage.setItem('ys_cart',JSON.stringify(cart));
+  updateCartBadge();
+  showToast('Added to cart!');
+}
+function addToCart(id){
+  if(!user){ openModal('auth-modal'); showToast('Please sign in to add to cart'); return; }
+  const p = getActiveProducts().find(pr=>pr.id===id);
+  if(!p) return;
+  // Products with priced variants must be chosen on the detail page
+  if(p.variants && p.variants.length){ openProduct(id); showToast('Please choose an option'); return; }
+  _addLine(p, {label:'', price:p.price});
+}
+function addToCartCurrent(){
+  if(!currentProduct) return;
+  _addLine(currentProduct, currentVariant || {label:'', price:currentProduct.price});
+}
+function buyNow(){
+  if(!user){ openModal('auth-modal'); showToast('Please sign in first'); return; }
+  addToCartCurrent();
+  showPage('checkout');
+}
+function cartTotals(){
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const seen={}; let shipping=0;
+  cart.forEach(i=>{ if(!seen[i.id]){ seen[i.id]=1; shipping+=(Number(i.shipping)||0); } });
+  const itemCount = cart.reduce((s,i)=>s+i.qty,0);
+  return { subtotal, shipping, total: subtotal+shipping, itemCount };
+}
+function selectPayment(el){
+  document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  const r=el.querySelector('input[type=radio]'); if(r) r.checked=true;
+}
+function updateCartBadge(){
+  const total = cart.reduce((s,i)=>s+i.qty,0);
+  document.getElementById('cart-badge').textContent=total;
+}
+function toggleWishlist(btn){ btn.classList.toggle('active'); btn.textContent=btn.classList.contains('active')?'♥':'♡'; showToast(btn.classList.contains('active')?'Added to wishlist':'Removed'); }
+function renderCart(){
+  if(!cart.length){
+    document.getElementById('cart-items-list').innerHTML='<div style="text-align:center;padding:3rem;color:var(--muted)"><div style="font-size:3rem;margin-bottom:1rem">🛒</div><h3>Your cart is empty</h3><p style="margin-top:0.5rem">Add some products to get started!</p></div>';
+    document.getElementById('cart-summary').innerHTML='';
+    return;
+  }
+  document.getElementById('cart-items-list').innerHTML = cart.map(item=>{
+    const key=item.key||item.id;
+    return `
+    <div class="cart-item">
+      <img src="${item.img||window.IMG_PLACEHOLDER}" alt="${item.name}" onerror="this.onerror=null;this.src=window.IMG_PLACEHOLDER">
+      <div class="cart-item-info">
+        <h4>${item.name}</h4>
+        <div class="meta">${item.brand}${item.variant?(' · '+item.variant):''}</div>
+        <div class="cart-item-price">₹${item.price.toLocaleString()}</div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="changeQty('${key}',-1)">−</button>
+          <span class="qty-display">${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty('${key}',1)">+</button>
+          <button onclick="removeFromCart('${key}')" style="margin-left:0.5rem;background:none;border:none;cursor:pointer;color:var(--accent);font-size:0.85rem">Remove</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  const t=cartTotals();
+  document.getElementById('cart-summary').innerHTML=`
+    <div class="summary-row"><span>Subtotal (${t.itemCount} items)</span><span>₹${t.subtotal.toLocaleString()}</span></div>
+    <div class="summary-row"><span>Shipping</span><span>${t.shipping?'₹'+t.shipping.toLocaleString():'FREE'}</span></div>
+    <div class="summary-row total"><span>Total</span><span>₹${t.total.toLocaleString()}</span></div>
+    <button class="btn-checkout" onclick="showPage('checkout')">Proceed to Checkout →</button>
+  `;
+}
+function changeQty(key,delta){
+  key=String(key);
+  const item=cart.find(i=>String(i.key||i.id)===key);
+  if(!item) return;
+  if(delta>0){
+    const live=getActiveProducts().find(p=>String(p.id)===String(item.id));
+    const max=live?(live.stock||0):item.qty;
+    if(item.qty+delta>max){ showToast('Only '+max+' in stock'); return; }
+  }
+  item.qty+=delta;
+  if(item.qty<=0) cart=cart.filter(i=>String(i.key||i.id)!==key);
+  localStorage.setItem('ys_cart',JSON.stringify(cart));
+  updateCartBadge();
+  renderCart();
+}
+function removeFromCart(key){
+  key=String(key);
+  cart=cart.filter(i=>String(i.key||i.id)!==key);
+  localStorage.setItem('ys_cart',JSON.stringify(cart));
+  updateCartBadge();
+  renderCart();
+  showToast('Removed from cart');
+}
+
+// ===== CHECKOUT =====
+function renderCheckoutSummary(){
+  const t=cartTotals();
+  document.getElementById('checkout-summary-rows').innerHTML=`
+    <div class="summary-row"><span>Subtotal (${t.itemCount} items)</span><span>₹${t.subtotal.toLocaleString()}</span></div>
+    <div class="summary-row"><span>Shipping</span><span>${t.shipping?'₹'+t.shipping.toLocaleString():'FREE'}</span></div>
+    <div class="summary-row total"><span>Total</span><span>₹${t.total.toLocaleString()}</span></div>
+  `;
+  if(user){
+    document.getElementById('co-name').value=user.name||'';
+    document.getElementById('co-phone').value=user.phone||'';
+    if(user.addr1) document.getElementById('co-addr1').value=user.addr1;
+    if(user.addr2) document.getElementById('co-addr2').value=user.addr2;
+  }
+}
+function validateCartStock(){
+  if(!cart.length){ showToast('Your cart is empty'); return false; }
+  for(const item of cart){
+    const live=getActiveProducts().find(p=>String(p.id)===String(item.id));
+    if(!live || (live.stock||0)<=0){
+      showToast(item.name+' is out of stock — please remove it'); renderCart(); return false;
+    }
+    if(item.qty>(live.stock||0)){
+      showToast('Only '+live.stock+' of '+item.name+' available — quantity adjusted');
+      item.qty=live.stock;
+      localStorage.setItem('ys_cart',JSON.stringify(cart));
+      updateCartBadge(); renderCart();
+      return false;
+    }
+  }
+  return true;
+}
+
+function placeOrder(){
+  if(!user){ openModal('auth-modal'); return; }
+  const name=document.getElementById('co-name').value.trim();
+  const phone=document.getElementById('co-phone').value.trim();
+  const addr1=document.getElementById('co-addr1').value.trim();
+  if(!name||!phone||!addr1){ showToast('Please fill delivery address'); return; }
+
+  // Block ordering anything out of stock or beyond available quantity
+  if(!validateCartStock()) return;
+
+  const total = cartTotals().total;
+  // Cash on Delivery only
+  confirmOrder({name, phone, addr1, total, paymentMethod:'COD'});
+}
+
+function confirmOrder({name, phone, addr1, total, paymentMethod}){
+  const orderId='YS'+Date.now().toString().slice(-8);
+  const delivDate = new Date(); delivDate.setDate(delivDate.getDate()+5);
+  const delivStr = delivDate.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+  const orderData={
+    id:orderId,
+    customerName:name,
+    phone:phone,
+    email:(user && user.email) ? user.email : '',
+    address:addr1,
+    items:[...cart],
+    status:'Processing',
+    date:new Date().toLocaleDateString('en-IN'),
+    delivery:delivStr,
+    total:total,
+    paymentMethod:paymentMethod||'COD',
+    createdAt:new Date().toISOString()
+  };
+  orders.unshift({id:orderId,items:[...cart],status:'Processing',date:orderData.date,delivery:delivStr,total});
+  localStorage.setItem('ys_orders',JSON.stringify(orders));
+  // Save to Firestore
+  if(typeof window.saveOrderToFirestore === 'function') window.saveOrderToFirestore(orderData);
+  cart=[];
+  localStorage.setItem('ys_cart',JSON.stringify(cart));
+  updateCartBadge();
+  document.getElementById('order-id').textContent=orderId;
+  document.getElementById('order-delivery-date').textContent=delivStr;
+  document.getElementById('order-success').style.display='block';
+  document.querySelectorAll('#checkout-page .checkout-section').forEach(s=>s.style.display='none');
+  document.querySelectorAll('#checkout-page .cart-summary .btn-checkout').forEach(b=>b.style.display='none');
+}
+
+function selectPaymentDuplicateRemoved(){}
+
+// ===== ORDERS =====
+function renderOrders(){
+  if(!user){ document.getElementById('orders-list').innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted)"><p>Please <button class="link-btn" onclick="openModal(\'auth-modal\')">sign in</button> to view your orders</p></div>'; return; }
+  if(!orders.length){ document.getElementById('orders-list').innerHTML='<div style="text-align:center;padding:2rem;color:var(--muted)"><div style="font-size:3rem;margin-bottom:1rem">📋</div><h3>No orders yet</h3></div>'; return; }
+  const statusClass={'Processing':'status-processing','Shipped':'status-shipping','Delivered':'status-delivered','Cancelled':'status-cancelled'};
+  document.getElementById('orders-list').innerHTML=orders.map(o=>`
+    <div class="order-card">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.7rem">
+        <div><strong style="font-size:0.95rem">${o.id}</strong><div style="font-size:0.8rem;color:var(--muted)">Placed: ${o.date}</div></div>
+        <span class="order-status ${statusClass[o.status]||'status-processing'}">${o.status}</span>
+      </div>
+      <div style="font-size:0.85rem;color:var(--muted);margin-bottom:0.5rem">${o.items.length} item(s) · ₹${o.total.toLocaleString()}</div>
+      <div style="font-size:0.85rem">🚚 Expected by <strong>${o.delivery}</strong></div>
+    </div>
+  `).join('');
+}
+
+// ===== TOAST =====
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// Close overlay on backdrop click
+document.getElementById('auth-modal').addEventListener('click',function(e){ if(e.target===this) closeModal('auth-modal'); });
+document.getElementById('account-modal').addEventListener('click',function(e){ if(e.target===this) closeModal('account-modal'); });
+
+// Desktop nav helper
+function setDesktopNav(el){
+  document.querySelectorAll('.desktop-nav-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
+// Update desktop user button when logged in/out
+function updateDesktopUserBtn(){
+  const btn = document.getElementById('desktop-user-btn');
+  if(!btn) return;
+  if(user){
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg> ${user.name.split(' ')[0]}`;
+    btn.onclick = () => openAccount();
+  } else {
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:18px;height:18px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg> Sign In`;
+    btn.onclick = () => openModal('auth-modal');
+  }
+}
+
+window.addEventListener('load',init);
+</script>
+</body>
+</html>
