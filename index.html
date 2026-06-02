@@ -303,6 +303,7 @@ body{padding-bottom:70px}
 #order-success p{color:var(--muted);font-size:.9rem;margin-bottom:.25rem;}
 </style>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script type="module">
   // ── Firebase SDK ──────────────────────────────────────────────────────────────
   import { initializeApp }   from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
@@ -315,12 +316,14 @@ body{padding-bottom:70px}
     signInWithPopup,
     signOut,
     onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence,
     updateProfile,
     RecaptchaVerifier,
     PhoneAuthProvider,
     signInWithCredential
   } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
-  import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+  import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, increment, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
   // ── Config ────────────────────────────────────────────────────────────────────
   const firebaseConfig = {
@@ -541,18 +544,12 @@ body{padding-bottom:70px}
   };
 
   // ── Session handling ──────────────────────────────────────────────────────
-  // Always open signed-out: never auto-restore a previous session (e.g. a phone
-  // sign-in from earlier). The very first auth callback fires on page load — if
-  // it carries a restored user, sign it out so the button stays "Sign In". Real
-  // sign-ins (Google / phone +91 / email) come through the button and update the
-  // UI via onUserSignedIn, so on-demand login still works.
-  let _authBootstrapped = false;
+  // Keep users logged in across page refreshes. Use local persistence, and when
+  // the auth state restores a user on load, populate the UI instead of clearing
+  // it. Sign-out only happens when the user explicitly taps Logout.
+  setPersistence(auth, browserLocalPersistence).catch(e => console.warn('Persistence:', e?.message || e));
+
   onAuthStateChanged(auth, (fbUser) => {
-    if (!_authBootstrapped) {
-      _authBootstrapped = true;
-      if (fbUser) { signOut(auth).catch(() => {}); }   // clear auto-restored session
-      return;                                          // keep label as "Sign In"
-    }
     if (fbUser) {
       window._fbUser = fbUser;
       if (!user) {
@@ -564,6 +561,13 @@ body{padding-bottom:70px}
       }
       if (typeof updateUserUI === 'function') updateUserUI();
       if (typeof updateDesktopUserBtn === 'function') updateDesktopUserBtn();
+      if (typeof window.subscribeMyOrders === 'function') window.subscribeMyOrders();
+    } else {
+      user = null;
+      window._fbUser = null;
+      if (typeof updateUserUI === 'function') updateUserUI();
+      if (typeof updateDesktopUserBtn === 'function') updateDesktopUserBtn();
+      if (typeof window.subscribeMyOrders === 'function') window.subscribeMyOrders();
     }
   });
 
@@ -609,11 +613,35 @@ body{padding-bottom:70px}
     console.error('Firestore listener error:', error);
   });
 
+  // ── Live orders for the signed-in customer ────────────────────────────────
+  // Subscribes to this user's orders in Firestore so status changes made in the
+  // admin (Processing → Shipped → Delivered) appear here in real time.
+  let _ordersUnsub = null;
+  window.subscribeMyOrders = function() {
+    if (_ordersUnsub) { _ordersUnsub(); _ordersUnsub = null; }
+    if (!user) { window.orders = []; orders = []; if (typeof renderOrders === 'function') renderOrders(); return; }
+    const myEmail = (user.email || '').toLowerCase();
+    const myPhone = user.phone || '';
+    _ordersUnsub = onSnapshot(collection(db, 'orders'), (snap) => {
+      const mine = [];
+      snap.forEach(docSnap => {
+        const o = docSnap.data();
+        const oEmail = (o.email || '').toLowerCase();
+        if ((myEmail && oEmail === myEmail) || (myPhone && o.phone === myPhone)) {
+          mine.push({ ...o, firestoreId: docSnap.id });
+        }
+      });
+      mine.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+      window.orders = mine; orders = mine;
+      try { localStorage.setItem('ys_orders', JSON.stringify(mine)); } catch (e) {}
+      if (typeof renderOrders === 'function') renderOrders();
+    }, (err) => console.error('Orders listener error:', err));
+  };
+
   // ── Save order to Firestore + decrement stock ─────────────────────────────
   window.saveOrderToFirestore = async function(orderData) {
     try {
       await addDoc(collection(db, 'orders'), orderData);
-      // Atomically reduce stock for each ordered item so it actually depletes
       if (Array.isArray(orderData.items)) {
         for (const it of orderData.items) {
           if (it && it.id && it.qty) {
@@ -925,12 +953,30 @@ body{padding-bottom:70px}
 
     <div class="checkout-section">
       <h3>💳 Payment Method</h3>
-      <div class="payment-option selected" id="pay-cod">
+      <div class="payment-option selected" onclick="selectPayment(this,'cod')" id="pay-cod">
         <input type="radio" name="payment" checked>
         <span class="pay-icon">💵</span>
         <div>
           <div class="payment-label">Cash on Delivery</div>
           <div class="payment-sublabel">Pay when your order arrives</div>
+        </div>
+      </div>
+      <div class="payment-option" onclick="selectPayment(this,'upi')" id="pay-upi">
+        <input type="radio" name="payment">
+        <span class="pay-icon">📲</span>
+        <div>
+          <div class="payment-label">UPI / GPay QR</div>
+          <div class="payment-sublabel">Scan & pay; amount filled in automatically</div>
+        </div>
+      </div>
+      <div id="upi-qr-panel" style="display:none;margin-top:0.8rem;padding:1rem;border:1px solid var(--border);border-radius:12px;background:var(--cream);text-align:center">
+        <div id="upi-qr" style="display:inline-block;background:#fff;padding:10px;border-radius:10px;min-height:60px"></div>
+        <div style="margin-top:0.7rem;font-size:0.95rem">Pay <strong>₹<span id="upi-amount">0</span></strong> to <strong id="upi-vpa-label"></strong></div>
+        <a id="upi-deeplink" href="#" style="display:inline-block;margin-top:0.7rem;background:var(--teal);color:#fff;text-decoration:none;padding:0.6rem 1.1rem;border-radius:8px;font-weight:600;font-size:0.9rem">Open UPI app to pay</a>
+        <div style="margin-top:0.6rem;font-size:0.78rem;color:var(--muted)">On a computer, scan the QR with GPay/PhonePe/Paytm. On your phone, tap the button above.</div>
+        <div style="margin-top:0.9rem;text-align:left">
+          <label style="font-size:0.82rem;color:var(--muted)">After paying, enter your UPI reference / transaction ID (recommended)</label>
+          <input type="text" id="upi-ref" placeholder="e.g. 4XXXXXXXXXXX" style="width:100%;margin-top:0.3rem;padding:0.55rem;border:1px solid var(--border);border-radius:8px">
         </div>
       </div>
     </div>
@@ -1023,6 +1069,12 @@ const IMG_PLACEHOLDER = 'data:image/svg+xml,' + encodeURIComponent(
   '</svg>'
 );
 window.IMG_PLACEHOLDER = IMG_PLACEHOLDER;
+
+// ===== UPI / GPay QR PAYMENT =====
+// >>> Store owner: set this to YOUR UPI ID (the same ID your GPay QR uses), e.g. '9876543210@okaxis' or 'younited@oksbi'.
+const UPI_ID = 'your-upi-id@bank';
+const UPI_PAYEE_NAME = 'Younited Shipping';
+window._payMethod = 'cod';
 
 let cart   = (() => { try { return JSON.parse(localStorage.getItem('ys_cart')   || '[]'); } catch { return []; } })();
 let orders = (() => { try { return JSON.parse(localStorage.getItem('ys_orders') || '[]'); } catch { return []; } })();
@@ -1287,7 +1339,7 @@ function _addLine(p, v){
   if(existing){ existing.qty++; }
   else {
     cart.push({ id:p.id, key, name:p.name, brand:p.brand, img:p.img,
-                price:unitPrice, variant:variantLabel, shipping:(p.shipping||0), qty:1 });
+                price:unitPrice, variant:variantLabel, shipping:(p.shipping||0), qty:1, selected:true });
   }
   localStorage.setItem('ys_cart',JSON.stringify(cart));
   updateCartBadge();
@@ -1308,19 +1360,74 @@ function addToCartCurrent(){
 function buyNow(){
   if(!user){ openModal('auth-modal'); showToast('Please sign in first'); return; }
   addToCartCurrent();
+  // Buy Now = purchase only this product; deselect everything else
+  if(currentProduct){
+    const label=(currentVariant&&currentVariant.label)?currentVariant.label:'';
+    const key=String(currentProduct.id)+(label?'::'+label:'');
+    cart.forEach(i=>i.selected=(String(i.key||i.id)===key));
+    localStorage.setItem('ys_cart',JSON.stringify(cart));
+  }
   showPage('checkout');
 }
+function selectedItems(){
+  // treat legacy items (no 'selected' field) as selected by default
+  return cart.filter(i=>i.selected!==false);
+}
 function cartTotals(){
-  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const sel = selectedItems();
+  const subtotal = sel.reduce((s,i)=>s+i.price*i.qty,0);
   const seen={}; let shipping=0;
-  cart.forEach(i=>{ if(!seen[i.id]){ seen[i.id]=1; shipping+=(Number(i.shipping)||0); } });
-  const itemCount = cart.reduce((s,i)=>s+i.qty,0);
+  sel.forEach(i=>{ if(!seen[i.id]){ seen[i.id]=1; shipping+=(Number(i.shipping)||0); } });
+  const itemCount = sel.reduce((s,i)=>s+i.qty,0);
   return { subtotal, shipping, total: subtotal+shipping, itemCount };
 }
-function selectPayment(el){
+function toggleCartItem(key){
+  key=String(key);
+  const item=cart.find(i=>String(i.key||i.id)===key);
+  if(!item) return;
+  item.selected = (item.selected===false);
+  localStorage.setItem('ys_cart',JSON.stringify(cart));
+  renderCart();
+}
+function toggleSelectAll(check){
+  cart.forEach(i=>i.selected=check);
+  localStorage.setItem('ys_cart',JSON.stringify(cart));
+  renderCart();
+}
+function buildUpiString(amount){
+  const note = UPI_PAYEE_NAME + ' Order';
+  return `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_PAYEE_NAME)}&am=${Number(amount).toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
+}
+function renderUpiQR(amount){
+  const el = document.getElementById('upi-qr');
+  if(!el) return false;
+  el.innerHTML = '';
+  if(!UPI_ID || UPI_ID === 'your-upi-id@bank'){
+    el.innerHTML = '<div style="color:var(--accent);font-size:0.82rem;padding:0.5rem">⚠️ UPI not configured yet. Store owner: set your UPI ID in the code.</div>';
+    return false;
+  }
+  const upiStr = buildUpiString(amount);
+  const link = document.getElementById('upi-deeplink');
+  if(link) link.href = upiStr;
+  if(typeof QRCode === 'undefined'){ el.textContent = 'QR loading… reopen this option in a moment.'; return false; }
+  new QRCode(el, { text: upiStr, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+  return true;
+}
+function selectPayment(el, method){
   document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected'));
   el.classList.add('selected');
   const r=el.querySelector('input[type=radio]'); if(r) r.checked=true;
+  window._payMethod = method || 'cod';
+  const panel = document.getElementById('upi-qr-panel');
+  if(window._payMethod === 'upi'){
+    const total = cartTotals().total;
+    const amtEl = document.getElementById('upi-amount'); if(amtEl) amtEl.textContent = total.toLocaleString();
+    const vpaEl = document.getElementById('upi-vpa-label'); if(vpaEl) vpaEl.textContent = UPI_ID;
+    renderUpiQR(total);
+    if(panel) panel.style.display = 'block';
+  } else if(panel){
+    panel.style.display = 'none';
+  }
 }
 function updateCartBadge(){
   const total = cart.reduce((s,i)=>s+i.qty,0);
@@ -1333,10 +1440,19 @@ function renderCart(){
     document.getElementById('cart-summary').innerHTML='';
     return;
   }
-  document.getElementById('cart-items-list').innerHTML = cart.map(item=>{
+  const allSel = cart.every(i=>i.selected!==false);
+  const selCount = selectedItems().reduce((s,i)=>s+i.qty,0);
+  const header = `
+    <label style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.2rem 0.8rem;font-size:0.88rem;color:var(--muted);cursor:pointer">
+      <input type="checkbox" ${allSel?'checked':''} onchange="toggleSelectAll(this.checked)" style="width:18px;height:18px;accent-color:var(--teal)">
+      Select all items
+    </label>`;
+  document.getElementById('cart-items-list').innerHTML = header + cart.map(item=>{
     const key=item.key||item.id;
+    const checked = item.selected!==false;
     return `
-    <div class="cart-item">
+    <div class="cart-item" style="${checked?'':'opacity:0.55'}">
+      <input type="checkbox" ${checked?'checked':''} onchange="toggleCartItem('${key}')" style="width:18px;height:18px;accent-color:var(--teal);margin-right:0.2rem;flex:none">
       <img src="${item.img||window.IMG_PLACEHOLDER}" alt="${item.name}" onerror="this.onerror=null;this.src=window.IMG_PLACEHOLDER">
       <div class="cart-item-info">
         <h4>${item.name}</h4>
@@ -1352,11 +1468,12 @@ function renderCart(){
     </div>`;
   }).join('');
   const t=cartTotals();
+  const canBuy = t.itemCount>0;
   document.getElementById('cart-summary').innerHTML=`
-    <div class="summary-row"><span>Subtotal (${t.itemCount} items)</span><span>₹${t.subtotal.toLocaleString()}</span></div>
+    <div class="summary-row"><span>Subtotal (${t.itemCount} selected)</span><span>₹${t.subtotal.toLocaleString()}</span></div>
     <div class="summary-row"><span>Shipping</span><span>${t.shipping?'₹'+t.shipping.toLocaleString():'FREE'}</span></div>
     <div class="summary-row total"><span>Total</span><span>₹${t.total.toLocaleString()}</span></div>
-    <button class="btn-checkout" onclick="showPage('checkout')">Proceed to Checkout →</button>
+    <button class="btn-checkout" ${canBuy?'':'disabled style="opacity:0.5;cursor:not-allowed"'} onclick="${canBuy?"showPage('checkout')":''}">Checkout ${selCount} item${selCount===1?'':'s'} →</button>
   `;
 }
 function changeQty(key,delta){
@@ -1399,11 +1516,12 @@ function renderCheckoutSummary(){
   }
 }
 function validateCartStock(){
-  if(!cart.length){ showToast('Your cart is empty'); return false; }
-  for(const item of cart){
+  const sel = selectedItems();
+  if(!sel.length){ showToast('Please select at least one item to buy'); return false; }
+  for(const item of sel){
     const live=getActiveProducts().find(p=>String(p.id)===String(item.id));
     if(!live || (live.stock||0)<=0){
-      showToast(item.name+' is out of stock — please remove it'); renderCart(); return false;
+      showToast(item.name+' is out of stock — please deselect or remove it'); renderCart(); return false;
     }
     if(item.qty>(live.stock||0)){
       showToast('Only '+live.stock+' of '+item.name+' available — quantity adjusted');
@@ -1427,11 +1545,17 @@ function placeOrder(){
   if(!validateCartStock()) return;
 
   const total = cartTotals().total;
-  // Cash on Delivery only
-  confirmOrder({name, phone, addr1, total, paymentMethod:'COD'});
+  const method = (window._payMethod === 'upi') ? 'UPI (QR)' : 'COD';
+  let upiRef = '';
+  if(window._payMethod === 'upi'){
+    if(!UPI_ID || UPI_ID === 'your-upi-id@bank'){ showToast('UPI payment is not set up yet — choose Cash on Delivery'); return; }
+    upiRef = (document.getElementById('upi-ref').value || '').trim();
+  }
+  confirmOrder({name, phone, addr1, total, paymentMethod:method, upiRef});
 }
 
-function confirmOrder({name, phone, addr1, total, paymentMethod}){
+function confirmOrder({name, phone, addr1, total, paymentMethod, upiRef}){
+  const ordered = selectedItems().map(i=>({...i}));
   const orderId='YS'+Date.now().toString().slice(-8);
   const delivDate = new Date(); delivDate.setDate(delivDate.getDate()+5);
   const delivStr = delivDate.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
@@ -1441,19 +1565,22 @@ function confirmOrder({name, phone, addr1, total, paymentMethod}){
     phone:phone,
     email:(user && user.email) ? user.email : '',
     address:addr1,
-    items:[...cart],
+    items:ordered,
     status:'Processing',
     date:new Date().toLocaleDateString('en-IN'),
     delivery:delivStr,
     total:total,
     paymentMethod:paymentMethod||'COD',
+    upiRef:upiRef||'',
     createdAt:new Date().toISOString()
   };
-  orders.unshift({id:orderId,items:[...cart],status:'Processing',date:orderData.date,delivery:delivStr,total});
-  localStorage.setItem('ys_orders',JSON.stringify(orders));
-  // Save to Firestore
+  // Optimistic local entry; the live Firestore listener will replace this with
+  // the authoritative copy (and keep its status in sync with the admin).
+  orders.unshift({id:orderId,items:ordered,status:'Processing',date:orderData.date,delivery:delivStr,total});
   if(typeof window.saveOrderToFirestore === 'function') window.saveOrderToFirestore(orderData);
-  cart=[];
+  // Keep any items the customer did NOT select for this order
+  cart = cart.filter(i=>i.selected===false);
+  cart.forEach(i=>i.selected=true);
   localStorage.setItem('ys_cart',JSON.stringify(cart));
   updateCartBadge();
   document.getElementById('order-id').textContent=orderId;
